@@ -3,9 +3,9 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 import { testConnection } from './config/database.js';
-import upload from './config/multer.js';
 import eventRoutes from './routes/eventRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import bureauMemberRoutes from './routes/bureauMemberRoutes.js';
@@ -24,12 +24,31 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Créer les dossiers s'ils n'existent pas
+const uploadDir = path.join(__dirname, '../public/uploads');
+const imagesDir = path.join(__dirname, '../public/images');
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log('📁 Dossier uploads créé');
+}
+
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir, { recursive: true });
+  console.log('📁 Dossier images créé');
+}
+
 // Middleware
 // Configuration CORS
 const corsOptions = {
   origin: [
     'http://localhost:5173',
-      'http://87.106.53.3'
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+    'http://127.0.0.1:5175',
+    'http://87.106.53.3'
   ],
   credentials: true,
   optionsSuccessStatus: 200
@@ -38,12 +57,9 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Middleware pour les uploads de fichiers
-app.use(upload.single('file')); // 'file' est le nom du champ FormData
-
 // Servir les fichiers statiques (images)
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads'))); // Ajout pour les images uploadées
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Routes API
 app.use('/api', bureauMemberRoutes);

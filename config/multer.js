@@ -1,8 +1,17 @@
 import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Déterminer le répertoire courant
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Chemin absolu vers le dossier uploads
+const uploadDir = path.join(__dirname, '../public/uploads');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/uploads/'); // dossier pour stocker les fichiers
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
