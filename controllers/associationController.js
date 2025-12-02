@@ -57,12 +57,12 @@ export const getVillesByAssociation = async (req, res) => {
 
 export const createAssociation = async (req, res) => {
   try {
-    // Les données peuvent venir de FormData (multipart) ou de JSON
-    const { nom, email, instagram } = req.body;
+    const { nom, email, instagram, logo } = req.body;
     
     console.log('Données reçues pour création:');
-    console.log('  Body:', req.body);
+    console.log('  Body keys:', Object.keys(req.body));
     console.log('  File:', req.file);
+    console.log('  Logo type:', typeof logo);
     
     if (!nom) {
       return res.status(400).json({ 
@@ -73,10 +73,15 @@ export const createAssociation = async (req, res) => {
     
     const associationData = { nom, email, instagram };
     
-    // Si un fichier a été uploadé, ajouter son chemin aux données
+    // Gérer le logo : soit depuis FormData (fichier uploadé), soit depuis JSON (base64)
     if (req.file) {
+      // Si un fichier a été uploadé via FormData
       associationData.logo = `/uploads/${req.file.filename}`;
-      console.log('Logo ajouté:', associationData.logo);
+      console.log('Logo ajouté (fichier):', associationData.logo);
+    } else if (logo && logo.startsWith('data:image')) {
+      // Si l'image est en base64 depuis le JSON, la sauvegarder
+      associationData.logo = logo;
+      console.log('Logo ajouté (base64)');
     }
     
     const association = await Association.create(associationData);
@@ -106,12 +111,13 @@ export const createAssociation = async (req, res) => {
 export const updateAssociation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nom, email, instagram } = req.body;
+    const { nom, email, instagram, logo } = req.body;
     
     console.log('Données reçues pour mise à jour:');
     console.log('  ID:', id);
-    console.log('  Body:', req.body);
+    console.log('  Body keys:', Object.keys(req.body));
     console.log('  File:', req.file);
+    console.log('  Logo type:', typeof logo);
     
     if (!nom) {
       return res.status(400).json({ 
@@ -122,10 +128,19 @@ export const updateAssociation = async (req, res) => {
     
     const associationData = { nom, email, instagram };
     
-    // Si un fichier a été uploadé, ajouter son chemin aux données
+    // Gérer le logo : soit depuis FormData (fichier uploadé), soit depuis JSON (base64)
     if (req.file) {
+      // Si un fichier a été uploadé via FormData
       associationData.logo = `/uploads/${req.file.filename}`;
-      console.log('Logo mis à jour:', associationData.logo);
+      console.log('Logo mis à jour (fichier):', associationData.logo);
+    } else if (logo && logo.startsWith('data:image')) {
+      // Si l'image est en base64 depuis le JSON, la sauvegarder
+      associationData.logo = logo;
+      console.log('Logo mis à jour (base64)');
+    } else if (logo && logo.startsWith('/uploads')) {
+      // Si c'est déjà une URL relative, la garder
+      associationData.logo = logo;
+      console.log('Logo conservé:', logo);
     }
     
     const association = await Association.update(id, associationData);

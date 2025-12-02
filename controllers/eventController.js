@@ -52,6 +52,9 @@ export const createEvent = async (req, res) => {
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       eventData.image_url = `/uploads/${req.file.filename}`
+    } else if (eventData.image_url && eventData.image_url.startsWith('data:image')) {
+      // Si l'image est en base64, la garder telle quelle
+      // Elle peut être stockée telle quelle ou convertie si nécessaire
     }
     
     const newEvent = await Event.create(eventData)
@@ -73,6 +76,8 @@ export const updateEvent = async (req, res) => {
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       eventData.image_url = `/uploads/${req.file.filename}`
+    } else if (eventData.image_url && eventData.image_url.startsWith('data:image')) {
+      // Si l'image est en base64, la garder telle quelle
     }
     
     const updatedEvent = await Event.update(id, eventData)

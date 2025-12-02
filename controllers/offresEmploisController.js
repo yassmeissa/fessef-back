@@ -47,7 +47,10 @@ export const getOffreById = async (req, res) => {
 
 export const createOffre = async (req, res) => {
   try {
-    const { poste, contact_entreprise, lien, description, date_limite } = req.body
+    const { poste, contact_entreprise, lien, description, date_limite, img_affiche } = req.body
+export const createOffre = async (req, res) => {
+  try {
+    const { poste, contact_entreprise, lien, description, date_limite, img_affiche } = req.body
     
     // Validation
     if (!poste || !contact_entreprise || !date_limite) {
@@ -61,6 +64,9 @@ export const createOffre = async (req, res) => {
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       offreData.img_affiche = `/uploads/${req.file.filename}`
+    } else if (img_affiche && img_affiche.startsWith('data:image')) {
+      // Si l'image est en base64, la garder telle quelle
+      offreData.img_affiche = img_affiche
     }
     
     const offre = await OffresEmplois.create(offreData)
@@ -77,7 +83,7 @@ export const createOffre = async (req, res) => {
 export const updateOffre = async (req, res) => {
   try {
     const { id } = req.params
-    const { poste, contact_entreprise, lien, description, date_limite } = req.body
+    const { poste, contact_entreprise, lien, description, date_limite, img_affiche } = req.body
     
     // Validation
     if (!poste || !contact_entreprise || !date_limite) {
@@ -91,6 +97,9 @@ export const updateOffre = async (req, res) => {
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       offreData.img_affiche = `/uploads/${req.file.filename}`
+    } else if (img_affiche && img_affiche.startsWith('data:image')) {
+      // Si l'image est en base64, la garder telle quelle
+      offreData.img_affiche = img_affiche
     }
     
     const offre = await OffresEmplois.update(id, offreData)

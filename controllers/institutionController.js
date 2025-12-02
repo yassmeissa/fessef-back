@@ -56,7 +56,7 @@ export const createInstitution = async (req, res) => {
   try {
     console.log('Données reçues pour création:', req.body);
     
-    const { nom, adresse, telephone, email, website } = req.body
+    const { nom, adresse, telephone, email, website, logo } = req.body
     
     // Validation
     if (!nom || nom.trim() === '') {
@@ -70,6 +70,9 @@ export const createInstitution = async (req, res) => {
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       institutionData.logo = `/uploads/${req.file.filename}`
+    } else if (logo && logo.startsWith('data:image')) {
+      // Si l'image est en base64, la garder telle quelle
+      institutionData.logo = logo
     }
     
     const institution = await Institution.create(institutionData)
@@ -89,7 +92,7 @@ export const updateInstitution = async (req, res) => {
     console.log('Données reçues pour mise à jour:', req.body);
     
     const { id } = req.params
-    const { nom, adresse, telephone, email, website } = req.body
+    const { nom, adresse, telephone, email, website, logo } = req.body
     
     // Validation
     if (!nom || nom.trim() === '') {
@@ -103,6 +106,9 @@ export const updateInstitution = async (req, res) => {
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       institutionData.logo = `/uploads/${req.file.filename}`
+    } else if (logo && logo.startsWith('data:image')) {
+      // Si l'image est en base64, la garder telle quelle
+      institutionData.logo = logo
     }
     
     const institution = await Institution.update(id, institutionData)
