@@ -48,9 +48,6 @@ export const getOffreById = async (req, res) => {
 export const createOffre = async (req, res) => {
   try {
     const { poste, contact_entreprise, lien, description, date_limite, img_affiche } = req.body
-export const createOffre = async (req, res) => {
-  try {
-    const { poste, contact_entreprise, lien, description, date_limite, img_affiche } = req.body
     
     // Validation
     if (!poste || !contact_entreprise || !date_limite) {
