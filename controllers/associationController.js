@@ -57,12 +57,18 @@ export const getVillesByAssociation = async (req, res) => {
 
 export const createAssociation = async (req, res) => {
   try {
+    // Les données peuvent venir de FormData (multipart) ou de JSON
     const { nom, email, instagram } = req.body;
     
-    console.log('Données reçues pour création:', req.body);
+    console.log('Données reçues pour création:');
+    console.log('  Body:', req.body);
+    console.log('  File:', req.file);
     
     if (!nom) {
-      return res.status(400).json({ error: 'nom is required' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'nom is required' 
+      });
     }
     
     const associationData = { nom, email, instagram };
@@ -70,19 +76,30 @@ export const createAssociation = async (req, res) => {
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       associationData.logo = `/uploads/${req.file.filename}`;
+      console.log('Logo ajouté:', associationData.logo);
     }
     
     const association = await Association.create(associationData);
-    res.status(201).json(association);
+    res.status(201).json({
+      success: true,
+      ...association
+    });
   } catch (error) {
     console.error('Error in createAssociation:', error);
     
     // Check for duplicate nom (UNIQUE constraint)
     if (error.message.includes('1062')) {
-      return res.status(400).json({ error: 'Association name already exists' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'Association name already exists' 
+      });
     }
     
-    res.status(500).json({ error: 'Error creating association' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Erreur interne du serveur',
+      error: error.message 
+    });
   }
 };
 
@@ -91,10 +108,16 @@ export const updateAssociation = async (req, res) => {
     const { id } = req.params;
     const { nom, email, instagram } = req.body;
     
-    console.log('Données reçues pour mise à jour:', req.body);
+    console.log('Données reçues pour mise à jour:');
+    console.log('  ID:', id);
+    console.log('  Body:', req.body);
+    console.log('  File:', req.file);
     
     if (!nom) {
-      return res.status(400).json({ error: 'nom is required' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'nom is required' 
+      });
     }
     
     const associationData = { nom, email, instagram };
@@ -102,18 +125,29 @@ export const updateAssociation = async (req, res) => {
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       associationData.logo = `/uploads/${req.file.filename}`;
+      console.log('Logo mis à jour:', associationData.logo);
     }
     
     const association = await Association.update(id, associationData);
     
     if (!association) {
-      return res.status(404).json({ error: 'Association not found' });
+      return res.status(404).json({ 
+        success: false,
+        error: 'Association not found' 
+      });
     }
     
-    res.json(association);
+    res.json({
+      success: true,
+      ...association
+    });
   } catch (error) {
     console.error('Error in updateAssociation:', error);
-    res.status(500).json({ error: 'Error updating association' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Erreur interne du serveur',
+      error: error.message 
+    });
   }
 };
 
