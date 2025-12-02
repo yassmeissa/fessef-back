@@ -33,14 +33,14 @@ const corsOptions = {
     // 'http://127.0.0.1:5173',
     // 'http://127.0.0.1:5174',
     // 'http://127.0.0.1:5175'
-      'http://87.106.53.3: 3001'
+      'http://87.106.53.3'
   ],
   credentials: true,
   optionsSuccessStatus: 200
 }
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Servir les fichiers statiques (images)
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
