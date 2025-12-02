@@ -48,10 +48,18 @@ export const getBureauMemberById = async (req, res) => {
 };
 
 // Créer un nouveau membre (protégé - admin seulement)
+// Créer un nouveau membre (protégé - admin seulement)
 export const createBureauMember = async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    const { poste, nom, fonction, ordre } = req.body;
+    const { poste, nom, fonction, ordre, photo } = req.body;
+
+    console.log('Données reçues pour création:');
+    console.log('  poste:', poste);
+    console.log('  nom:', nom);
+    console.log('  fonction:', fonction);
+    console.log('  ordre:', ordre);
+    console.log('  photo présente:', !!photo);
 
     // Validation
     if (!poste || !nom || !fonction) {
@@ -66,16 +74,20 @@ export const createBureauMember = async (req, res) => {
 
     const targetOrdre = typeof ordre === 'number' ? ordre : 0;
     
-    let photo = null;
+    let photoToStore = null;
     
-    // Si un fichier a été uploadé, utiliser son chemin
-    if (req.file) {
-      photo = `/uploads/${req.file.filename}`;
+    // Gérer la photo : soit base64, soit fichier uploadé
+    if (photo && photo.trim() !== '') {
+      photoToStore = photo; // Peut être base64 ou URL
+      console.log('Photo ajoutée (base64 ou URL)');
+    } else if (req.file) {
+      photoToStore = `/uploads/${req.file.filename}`;
+      console.log('Photo ajoutée (fichier):', photoToStore);
     }
 
     // Si on demande un ordre > 0, verrouiller la plage et décaler les ordres existants (atomiquement)
     if (targetOrdre > 0) {
-      // Verrouille les lignes (et les gaps si le moteur de stockage est InnoDB) afin d'éviter des insertions concurrentes au même ordre
+      // Verrouille les lignes afin d'éviter des insertions concurrentes au même ordre
       await connection.execute(
         'SELECT id FROM bureauMembers WHERE ordre >= ? FOR UPDATE',
         [targetOrdre]
@@ -89,7 +101,7 @@ export const createBureauMember = async (req, res) => {
 
     const [result] = await connection.execute(
       'INSERT INTO bureauMembers (poste, nom, fonction, photo, ordre) VALUES (?, ?, ?, ?, ?)',
-      [poste, nom, fonction, photo, targetOrdre]
+      [poste, nom, fonction, photoToStore, targetOrdre]
     );
 
     await connection.commit();
@@ -121,11 +133,19 @@ export const updateBureauMember = async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const { id } = req.params;
-    const { poste, nom, fonction, ordre } = req.body;
+    const { poste, nom, fonction, ordre, photo } = req.body;
+
+    console.log('Données reçues pour mise à jour:');
+    console.log('  ID:', id);
+    console.log('  poste:', poste);
+    console.log('  nom:', nom);
+    console.log('  fonction:', fonction);
+    console.log('  ordre:', ordre);
+    console.log('  photo présente:', !!photo);
 
     await connection.beginTransaction();
 
-    // Lock the row for this member
+    // Verrouiller la ligne du membre
     const [rows] = await connection.execute('SELECT * FROM bureauMembers WHERE id = ? FOR UPDATE', [id]);
     const member = rows[0];
 
@@ -150,9 +170,16 @@ export const updateBureauMember = async (req, res) => {
     const updatedFonction = fonction || member.fonction;
     
     let updatedPhoto = member.photo;
-    // Si un fichier a été uploadé, utiliser son chemin
-    if (req.file) {
+    
+    // Gérer la photo : base64, fichier, ou conserver l'existante
+    if (photo && photo.trim() !== '') {
+      updatedPhoto = photo; // Peut être base64 ou URL
+      console.log('Photo mise à jour (base64 ou URL)');
+    } else if (req.file) {
       updatedPhoto = `/uploads/${req.file.filename}`;
+      console.log('Photo mise à jour (fichier):', updatedPhoto);
+    } else {
+      console.log('Photo conservée:', updatedPhoto);
     }
     
     const updatedOrdre = typeof ordre === 'number' ? ordre : member.ordre;
