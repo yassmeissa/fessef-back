@@ -28,6 +28,7 @@ const PORT = process.env.PORT || 3001;
 // Configuration CORS
 const corsOptions = {
   origin: [
+    'http://localhost:5173',
       'http://87.106.53.3'
   ],
   credentials: true,

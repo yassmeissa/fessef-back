@@ -8,6 +8,7 @@ import {
   deleteInstitution
 } from '../controllers/institutionController.js'
 import { verifyToken } from '../controllers/authController.js'
+import upload from '../config/multer.js'
 
 const router = express.Router()
 
@@ -17,8 +18,8 @@ router.get('/id/:id', getInstitutionById)
 router.get('/ville/:villeId', getInstitutionByVille)
 
 // Routes protégées (admin only)
-router.post('/', verifyToken, createInstitution)
-router.put('/:id', verifyToken, updateInstitution)
+router.post('/', verifyToken, upload.single('file'), createInstitution)
+router.put('/:id', verifyToken, upload.single('file'), updateInstitution)
 router.delete('/:id', verifyToken, deleteInstitution)
 
 export default router

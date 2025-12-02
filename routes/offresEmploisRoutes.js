@@ -8,6 +8,7 @@ import {
   deleteOffre
 } from '../controllers/offresEmploisController.js'
 import { verifyToken } from '../controllers/authController.js'
+import upload from '../config/multer.js'
 
 const router = express.Router()
 
@@ -17,8 +18,8 @@ router.get('/actives', getActiveOffres)
 router.get('/:id', getOffreById)
 
 // Routes protégées (admin only)
-router.post('/', verifyToken, createOffre)
-router.put('/:id', verifyToken, updateOffre)
+router.post('/', verifyToken, upload.single('file'), createOffre)
+router.put('/:id', verifyToken, upload.single('file'), updateOffre)
 router.delete('/:id', verifyToken, deleteOffre)
 
 export default router

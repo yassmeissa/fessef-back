@@ -11,6 +11,7 @@ import {
   removeVilleFromAssociation
 } from '../controllers/associationController.js';
 import { verifyToken } from '../controllers/authController.js';
+import upload from '../config/multer.js';
 
 const router = express.Router();
 
@@ -21,8 +22,8 @@ router.get('/ville/:villeId', getAssociationByVille);
 router.get('/:id/villes', getVillesByAssociation);
 
 // Protected routes (require authentication)
-router.post('/', verifyToken, createAssociation);
-router.put('/:id', verifyToken, updateAssociation);
+router.post('/', verifyToken, upload.single('file'), createAssociation);
+router.put('/:id', verifyToken, upload.single('file'), updateAssociation);
 router.delete('/:id', verifyToken, deleteAssociation);
 router.post('/:id/villes', verifyToken, addVilleToAssociation);
 router.delete('/:id/villes/:villeId', verifyToken, removeVilleFromAssociation);

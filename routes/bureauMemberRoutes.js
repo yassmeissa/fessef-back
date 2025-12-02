@@ -7,6 +7,7 @@ import {
   deleteBureauMember
 } from '../controllers/bureauMemberController.js';
 import { verifyToken } from '../controllers/authController.js';
+import upload from '../config/multer.js';
 
 const router = express.Router();
 
@@ -15,8 +16,8 @@ router.get('/bureau-members', getBureauMembers);
 router.get('/bureau-members/:id', getBureauMemberById);
 
 // Routes protégées (admin seulement)
-router.post('/bureau-members', verifyToken, createBureauMember);
-router.put('/bureau-members/:id', verifyToken, updateBureauMember);
+router.post('/bureau-members', verifyToken, upload.single('file'), createBureauMember);
+router.put('/bureau-members/:id', verifyToken, upload.single('file'), updateBureauMember);
 router.delete('/bureau-members/:id', verifyToken, deleteBureauMember);
 
 export default router;

@@ -51,7 +51,7 @@ export const createEvent = async (req, res) => {
     
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
-      eventData.image = `/uploads/${req.file.filename}`
+      eventData.image_url = `/uploads/${req.file.filename}`
     }
     
     const newEvent = await Event.create(eventData)
@@ -72,7 +72,7 @@ export const updateEvent = async (req, res) => {
     
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
-      eventData.image = `/uploads/${req.file.filename}`
+      eventData.image_url = `/uploads/${req.file.filename}`
     }
     
     const updatedEvent = await Event.update(id, eventData)
