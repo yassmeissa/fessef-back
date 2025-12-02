@@ -65,7 +65,14 @@ export const createInstitution = async (req, res) => {
       })
     }
     
-    const institution = await Institution.create(req.body)
+    const institutionData = req.body
+    
+    // Si un fichier a été uploadé, ajouter son chemin aux données
+    if (req.file) {
+      institutionData.logo = `/uploads/${req.file.filename}`
+    }
+    
+    const institution = await Institution.create(institutionData)
     console.log('Institution créée:', institution);
     res.status(201).json(institution)
   } catch (error) {
@@ -91,7 +98,14 @@ export const updateInstitution = async (req, res) => {
       })
     }
     
-    const institution = await Institution.update(id, req.body)
+    const institutionData = req.body
+    
+    // Si un fichier a été uploadé, ajouter son chemin aux données
+    if (req.file) {
+      institutionData.logo = `/uploads/${req.file.filename}`
+    }
+    
+    const institution = await Institution.update(id, institutionData)
     console.log('Institution mise à jour:', institution);
     res.json(institution)
   } catch (error) {

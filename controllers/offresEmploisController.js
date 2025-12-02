@@ -47,7 +47,7 @@ export const getOffreById = async (req, res) => {
 
 export const createOffre = async (req, res) => {
   try {
-    const { poste, contact_entreprise, img_affiche, lien, description, date_limite } = req.body
+    const { poste, contact_entreprise, lien, description, date_limite } = req.body
     
     // Validation
     if (!poste || !contact_entreprise || !date_limite) {
@@ -56,7 +56,14 @@ export const createOffre = async (req, res) => {
       })
     }
     
-    const offre = await OffresEmplois.create(req.body)
+    const offreData = req.body
+    
+    // Si un fichier a été uploadé, ajouter son chemin aux données
+    if (req.file) {
+      offreData.img_affiche = `/uploads/${req.file.filename}`
+    }
+    
+    const offre = await OffresEmplois.create(offreData)
     res.status(201).json(offre)
   } catch (error) {
     console.error('Erreur lors de la création de l\'offre d\'emploi:', error)
@@ -70,7 +77,7 @@ export const createOffre = async (req, res) => {
 export const updateOffre = async (req, res) => {
   try {
     const { id } = req.params
-    const { poste, contact_entreprise, img_affiche, lien, description, date_limite } = req.body
+    const { poste, contact_entreprise, lien, description, date_limite } = req.body
     
     // Validation
     if (!poste || !contact_entreprise || !date_limite) {
@@ -79,7 +86,14 @@ export const updateOffre = async (req, res) => {
       })
     }
     
-    const offre = await OffresEmplois.update(id, req.body)
+    const offreData = req.body
+    
+    // Si un fichier a été uploadé, ajouter son chemin aux données
+    if (req.file) {
+      offreData.img_affiche = `/uploads/${req.file.filename}`
+    }
+    
+    const offre = await OffresEmplois.update(id, offreData)
     res.json(offre)
   } catch (error) {
     if (error.message === 'Offre d\'emploi non trouvée') {

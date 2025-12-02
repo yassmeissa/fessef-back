@@ -51,7 +51,7 @@ export const getBureauMemberById = async (req, res) => {
 export const createBureauMember = async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    const { poste, nom, fonction, photo, ordre } = req.body;
+    const { poste, nom, fonction, ordre } = req.body;
 
     // Validation
     if (!poste || !nom || !fonction) {
@@ -65,6 +65,13 @@ export const createBureauMember = async (req, res) => {
     await connection.beginTransaction();
 
     const targetOrdre = typeof ordre === 'number' ? ordre : 0;
+    
+    let photo = null;
+    
+    // Si un fichier a été uploadé, utiliser son chemin
+    if (req.file) {
+      photo = `/uploads/${req.file.filename}`;
+    }
 
     // Si on demande un ordre > 0, verrouiller la plage et décaler les ordres existants (atomiquement)
     if (targetOrdre > 0) {
@@ -82,7 +89,7 @@ export const createBureauMember = async (req, res) => {
 
     const [result] = await connection.execute(
       'INSERT INTO bureauMembers (poste, nom, fonction, photo, ordre) VALUES (?, ?, ?, ?, ?)',
-      [poste, nom, fonction, photo || null, targetOrdre]
+      [poste, nom, fonction, photo, targetOrdre]
     );
 
     await connection.commit();
@@ -114,7 +121,7 @@ export const updateBureauMember = async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const { id } = req.params;
-    const { poste, nom, fonction, photo, ordre } = req.body;
+    const { poste, nom, fonction, ordre } = req.body;
 
     await connection.beginTransaction();
 
@@ -141,7 +148,13 @@ export const updateBureauMember = async (req, res) => {
     const updatedPoste = poste || member.poste;
     const updatedNom = nom || member.nom;
     const updatedFonction = fonction || member.fonction;
-    const updatedPhoto = photo !== undefined ? photo : member.photo;
+    
+    let updatedPhoto = member.photo;
+    // Si un fichier a été uploadé, utiliser son chemin
+    if (req.file) {
+      updatedPhoto = `/uploads/${req.file.filename}`;
+    }
+    
     const updatedOrdre = typeof ordre === 'number' ? ordre : member.ordre;
 
     // Si l'ordre change, verrouiller la plage affectée puis ajuster les autres rangs dans la transaction
@@ -179,7 +192,7 @@ export const updateBureauMember = async (req, res) => {
     // Mettre à jour le membre
     const [result] = await connection.execute(
       'UPDATE bureauMembers SET poste = ?, nom = ?, fonction = ?, photo = ?, ordre = ? WHERE id = ?',
-      [updatedPoste, updatedNom, updatedFonction, updatedPhoto || null, updatedOrdre || 0, id]
+      [updatedPoste, updatedNom, updatedFonction, updatedPhoto, updatedOrdre || 0, id]
     );
 
     await connection.commit();

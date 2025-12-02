@@ -57,7 +57,7 @@ export const getVillesByAssociation = async (req, res) => {
 
 export const createAssociation = async (req, res) => {
   try {
-    const { nom, email, instagram, logo } = req.body;
+    const { nom, email, instagram } = req.body;
     
     console.log('Données reçues pour création:', req.body);
     
@@ -65,7 +65,14 @@ export const createAssociation = async (req, res) => {
       return res.status(400).json({ error: 'nom is required' });
     }
     
-    const association = await Association.create({ nom, email, instagram, logo });
+    const associationData = { nom, email, instagram };
+    
+    // Si un fichier a été uploadé, ajouter son chemin aux données
+    if (req.file) {
+      associationData.logo = `/uploads/${req.file.filename}`;
+    }
+    
+    const association = await Association.create(associationData);
     res.status(201).json(association);
   } catch (error) {
     console.error('Error in createAssociation:', error);
@@ -82,7 +89,7 @@ export const createAssociation = async (req, res) => {
 export const updateAssociation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nom, email, instagram, logo } = req.body;
+    const { nom, email, instagram } = req.body;
     
     console.log('Données reçues pour mise à jour:', req.body);
     
@@ -90,7 +97,14 @@ export const updateAssociation = async (req, res) => {
       return res.status(400).json({ error: 'nom is required' });
     }
     
-    const association = await Association.update(id, { nom, email, instagram, logo });
+    const associationData = { nom, email, instagram };
+    
+    // Si un fichier a été uploadé, ajouter son chemin aux données
+    if (req.file) {
+      associationData.logo = `/uploads/${req.file.filename}`;
+    }
+    
+    const association = await Association.update(id, associationData);
     
     if (!association) {
       return res.status(404).json({ error: 'Association not found' });

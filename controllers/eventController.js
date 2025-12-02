@@ -48,6 +48,12 @@ export const getEventById = async (req, res) => {
 export const createEvent = async (req, res) => {
   try {
     const eventData = req.body
+    
+    // Si un fichier a été uploadé, ajouter son chemin aux données
+    if (req.file) {
+      eventData.image = `/uploads/${req.file.filename}`
+    }
+    
     const newEvent = await Event.create(eventData)
     res.status(201).json(newEvent)
   } catch (error) {
@@ -63,6 +69,12 @@ export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params
     const eventData = req.body
+    
+    // Si un fichier a été uploadé, ajouter son chemin aux données
+    if (req.file) {
+      eventData.image = `/uploads/${req.file.filename}`
+    }
+    
     const updatedEvent = await Event.update(id, eventData)
     
     if (!updatedEvent) {

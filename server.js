@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
 import { testConnection } from './config/database.js';
+import upload from './config/multer.js';
 import eventRoutes from './routes/eventRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import bureauMemberRoutes from './routes/bureauMemberRoutes.js';
@@ -27,12 +28,6 @@ const PORT = process.env.PORT || 3001;
 // Configuration CORS
 const corsOptions = {
   origin: [
-    // 'http://localhost:5173',
-    // 'http://localhost:5174', 
-    // 'http://localhost:5175',
-    // 'http://127.0.0.1:5173',
-    // 'http://127.0.0.1:5174',
-    // 'http://127.0.0.1:5175'
       'http://87.106.53.3'
   ],
   credentials: true,
@@ -41,6 +36,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Middleware pour les uploads de fichiers
+app.use(upload.single('file')); // 'file' est le nom du champ FormData
 
 // Servir les fichiers statiques (images)
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
@@ -68,6 +66,16 @@ app.get('/api/health', (req, res) => {
 // Gestion globale des erreurs
 app.use((error, req, res, next) => {
   console.error('Erreur serveur:', error);
+  
+  // Erreur multer (upload de fichier)
+  if (error.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({
+      success: false,
+      message: 'Fichier trop volumineux',
+      error: 'La taille maximale autorisée est dépassée'
+    });
+  }
+  
   res.status(500).json({
     success: false,
     message: 'Erreur interne du serveur',
@@ -89,16 +97,21 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log('🚀 Serveur FESSEF démarré avec succès');
-      console.log(`📍 URL: http://localhost:${PORT}`);
+      console.log(`📍 URL locale: http://localhost:${PORT}`);
+      console.log(`📍 URL publique: http://87.106.53.3:${PORT}`);
       console.log(`🌍 Environnement: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔗 Frontend autorisé: http://localhost:5173, 5174, 5175`);
+      console.log(`🔗 Origins CORS autorisées:`);
+      console.log(`   - http://localhost:5173`);
+      console.log(`   - http://localhost:5174`);
+      console.log(`   - http://localhost:5175`);
+      console.log(`   - http://87.106.53.3`);
       console.log('');
       console.log('📚 Endpoints API disponibles:');
       console.log('  GET    /api/health              - Test de l\'API');
       console.log('  GET    /api/events              - Liste des événements');
       console.log('  GET    /api/events/:id          - Détails d\'un événement');
       console.log('  GET    /api/events/search?q=... - Recherche d\'événements');
-      console.log('  POST   /api/events              - Créer un événement');
+      console.log('  POST   /api/events              - Créer un événement (avec upload)');
       console.log('  PUT    /api/events/:id          - Modifier un événement');
       console.log('  DELETE /api/events/:id          - Supprimer un événement');
       console.log('');
