@@ -8,6 +8,7 @@ const buildImageUrl = (imagePath, req) => {
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:image')) {
     return imagePath;
   }
+
   
   // Construire l'URL complète avec le protocole et l'host
   // Utiliser le header X-Forwarded-Proto si disponible (pour nginx/reverse proxy)
