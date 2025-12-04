@@ -78,24 +78,21 @@ export const createEvent = async (req, res) => {
   try {
     let eventData = req.body
     
-    // Remplacer undefined par null pour éviter les erreurs de binding
-    Object.keys(eventData).forEach(key => {
-      if (eventData[key] === undefined) {
-        eventData[key] = null
-      }
-    })
-    
-    // Gérer les dates nulles pour les événements "Bientôt"
-    if (eventData.date === 'null' || eventData.date === null || eventData.date === '') {
-      eventData.date = null
-    }
-    if (eventData.time === 'null' || eventData.time === null || eventData.time === '') {
-      eventData.time = null
+    // Nettoyer les données - ne garder que les champs valides
+    const cleanedData = {
+      title: eventData.title || null,
+      date: eventData.date === 'null' || eventData.date === null || eventData.date === '' ? null : eventData.date,
+      time: eventData.time === 'null' || eventData.time === null || eventData.time === '' ? null : eventData.time,
+      description: eventData.description || null,
+      location: eventData.location || null,
+      summary: eventData.summary || null,
+      status: eventData.status || 'bientot',
+      image_url: eventData.image_url || null
     }
     
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
-      eventData.image_url = `/uploads/${req.file.filename}`
+      cleanedData.image_url = `/uploads/${req.file.filename}`
     } else if (eventData.image_url && !eventData.image_url.startsWith('data:image')) {
       // Si c'est déjà une URL, la garder telle quelle
     } else if (eventData.image_url && eventData.image_url.startsWith('data:image')) {
@@ -105,7 +102,7 @@ export const createEvent = async (req, res) => {
       })
     }
     
-    const newEvent = await Event.create(eventData)
+    const newEvent = await Event.create(cleanedData)
     
     // Construire l'URL complète pour la réponse
     newEvent.image_url = buildImageUrl(newEvent.image_url, req)
@@ -124,24 +121,21 @@ export const updateEvent = async (req, res) => {
     const { id } = req.params
     let eventData = req.body
     
-    // Remplacer undefined par null pour éviter les erreurs de binding
-    Object.keys(eventData).forEach(key => {
-      if (eventData[key] === undefined) {
-        eventData[key] = null
-      }
-    })
-    
-    // Gérer les dates nulles pour les événements "Bientôt"
-    if (eventData.date === 'null' || eventData.date === null || eventData.date === '') {
-      eventData.date = null
-    }
-    if (eventData.time === 'null' || eventData.time === null || eventData.time === '') {
-      eventData.time = null
+    // Nettoyer les données - ne garder que les champs valides
+    const cleanedData = {
+      title: eventData.title || null,
+      date: eventData.date === 'null' || eventData.date === null || eventData.date === '' ? null : eventData.date,
+      time: eventData.time === 'null' || eventData.time === null || eventData.time === '' ? null : eventData.time,
+      description: eventData.description || null,
+      location: eventData.location || null,
+      summary: eventData.summary || null,
+      status: eventData.status || 'bientot',
+      image_url: eventData.image_url || null
     }
     
-    // Si un fichier a été uploadé, ajouter son chemin aux données
+    // Si un fichier a été uploadé, remplacer l'image_url
     if (req.file) {
-      eventData.image_url = `/uploads/${req.file.filename}`
+      cleanedData.image_url = `/uploads/${req.file.filename}`
     } else if (eventData.image_url && eventData.image_url.startsWith('data:image')) {
       // Si l'image est en base64, rejeter et demander un upload
       return res.status(400).json({
@@ -149,7 +143,7 @@ export const updateEvent = async (req, res) => {
       })
     }
     
-    const updatedEvent = await Event.update(id, eventData)
+    const updatedEvent = await Event.update(id, cleanedData)
     
     if (!updatedEvent) {
       return res.status(404).json({ error: 'Événement non trouvé' })
