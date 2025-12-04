@@ -25,8 +25,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Créer les dossiers s'ils n'existent pas
-const uploadDir = path.join(__dirname, '../public/uploads');
-const imagesDir = path.join(__dirname, '../public/images');
+const uploadDir = path.join(__dirname, 'public/uploads');
+const imagesDir = path.join(__dirname, 'public/images');
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
