@@ -59,6 +59,19 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Middleware de debug pour les requêtes POST
+app.use((req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    console.log('\n🔵 ========== REQUÊTE ENTRANTE ==========');
+    console.log('Méthode:', req.method);
+    console.log('URL:', req.url);
+    console.log('Content-Type:', req.get('content-type'));
+    console.log('Content-Length:', req.get('content-length'));
+    console.log('=========================================\n');
+  }
+  next();
+});
+
 // Servir les fichiers statiques (images)
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));

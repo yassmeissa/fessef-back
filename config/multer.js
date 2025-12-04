@@ -20,8 +20,13 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
+    // Nettoyer le nom du fichier - remplacer les caractères spéciaux
+    const sanitized = file.originalname
+      .replace(/[^\w\s.-]/g, '_')  // Remplacer caractères spéciaux par _
+      .replace(/\s+/g, '_');        // Remplacer espaces par _
+    
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = uniqueSuffix + '-' + file.originalname;
+    const filename = uniqueSuffix + '-' + sanitized;
     console.log('📝 Multer filename:', filename);
     cb(null, filename);
   }
@@ -34,7 +39,7 @@ const upload = multer({
     fieldSize: 1 * 1024 * 1024,        // 1MB max pour les champs texte (nom, mandat)
     fields: 100,
     files: 1,
-    parts: 2                           // Limiter le nombre de parts (nom, mandat, image)
+    parts: 100                         // Augmenter le nombre de parts
   },
   fileFilter: function (req, file, cb) {
     console.log('🔍 Multer fileFilter - Vérification du fichier:');
