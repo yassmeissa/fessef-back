@@ -10,8 +10,11 @@ const buildImageUrl = (imagePath, req) => {
   }
   
   // Construire l'URL complète avec le protocole et l'host
-  const protocol = req.protocol || 'http';
+  // Utiliser le header X-Forwarded-Proto si disponible (pour nginx/reverse proxy)
+  let protocol = req.get('X-Forwarded-Proto') || req.protocol || 'http';
   const host = req.get('host') || 'localhost:3001';
+  
+  console.log(`🔗 URL construction: protocol=${protocol}, host=${host}, path=${imagePath}`);
   return `${protocol}://${host}${imagePath}`;
 };
 
