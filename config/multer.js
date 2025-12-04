@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 const upload = multer({ 
   storage,
   limits: {
-    fileSize: 200 * 1024 * 1024,     // 200MB max pour les fichiers
+    fileSize: 50 * 1024 * 1024,      // 50MB max pour les fichiers (suffisant pour images)
     fieldSize: 200 * 1024 * 1024     // 200MB max pour les champs texte
   },
   fileFilter: function (req, file, cb) {
