@@ -54,8 +54,10 @@ const corsOptions = {
   optionsSuccessStatus: 200
 }
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '200mb' }));
-app.use(express.urlencoded({ limit: '200mb', extended: true }));
+
+// Augmenter les limites AVANT les routes
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Servir les fichiers statiques (images)
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
@@ -82,21 +84,63 @@ app.get('/api/health', (req, res) => {
 
 // Gestion globale des erreurs
 app.use((error, req, res, next) => {
-  console.error('Erreur serveur:', error);
+  console.error('\n❌ ========== ERREUR GLOBALE ==========');
+  console.error('Erreur Type:', error.constructor.name);
+  console.error('Erreur Message:', error.message);
+  console.error('Erreur Code:', error.code);
+  console.error('URL:', req.method, req.url);
+  console.error('Stack trace:', error.stack);
+  console.error('=====================================\n');
   
-  // Erreur multer (upload de fichier)
+  // Erreur multer - LIMIT_FILE_SIZE
   if (error.code === 'LIMIT_FILE_SIZE') {
+    console.error('⚠️ ERREUR MULTER: Fichier trop volumineux');
     return res.status(413).json({
       success: false,
       message: 'Fichier trop volumineux',
-      error: 'La taille maximale autorisée est dépassée'
+      error: 'La taille maximale autorisée est dépassée',
+      code: 'LIMIT_FILE_SIZE'
+    });
+  }
+  
+  // Erreur multer - LIMIT_PART_COUNT
+  if (error.code === 'LIMIT_PART_COUNT') {
+    console.error('⚠️ ERREUR MULTER: Trop de parts');
+    return res.status(413).json({
+      success: false,
+      message: 'Requête trop complexe',
+      error: 'Trop de champs/fichiers',
+      code: 'LIMIT_PART_COUNT'
+    });
+  }
+  
+  // Erreur multer - LIMIT_FIELD_SIZE
+  if (error.code === 'LIMIT_FIELD_SIZE') {
+    console.error('⚠️ ERREUR MULTER: Champ trop volumineux');
+    return res.status(413).json({
+      success: false,
+      message: 'Champ de formulaire trop volumineux',
+      error: 'Un champ textuel dépasse la limite',
+      code: 'LIMIT_FIELD_SIZE'
+    });
+  }
+  
+  // Autres erreurs multer
+  if (error.message && error.message.includes('Type de fichier non autorisé')) {
+    console.error('⚠️ ERREUR MULTER: Type de fichier rejeté');
+    return res.status(400).json({
+      success: false,
+      message: 'Type de fichier non autorisé',
+      error: error.message,
+      code: 'INVALID_FILE_TYPE'
     });
   }
   
   res.status(500).json({
     success: false,
     message: 'Erreur interne du serveur',
-    error: process.env.NODE_ENV === 'development' ? error.message : 'Une erreur est survenue'
+    error: process.env.NODE_ENV === 'development' ? error.message : 'Une erreur est survenue',
+    code: error.code
   });
 });
 

@@ -11,27 +11,46 @@ const uploadDir = path.join(__dirname, '../public/uploads');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    console.log('📤 Multer destination - File:', {
+      fieldname: file.fieldname,
+      originalname: file.originalname,
+      encoding: file.encoding,
+      mimetype: file.mimetype
+    });
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    const filename = uniqueSuffix + '-' + file.originalname;
+    console.log('📝 Multer filename:', filename);
+    cb(null, filename);
   }
 });
 
 const upload = multer({ 
   storage,
   limits: {
-    fileSize: 50 * 1024 * 1024,      // 50MB max pour les fichiers (suffisant pour images)
-    fieldSize: 200 * 1024 * 1024     // 200MB max pour les champs texte
+    fileSize: 10 * 1024 * 1024,        // 10MB max pour les fichiers
+    fieldSize: 1 * 1024 * 1024,        // 1MB max pour les champs texte (nom, mandat)
+    fields: 100,
+    files: 1,
+    parts: 2                           // Limiter le nombre de parts (nom, mandat, image)
   },
   fileFilter: function (req, file, cb) {
+    console.log('🔍 Multer fileFilter - Vérification du fichier:');
+    console.log('  - Fieldname:', file.fieldname);
+    console.log('  - Originalname:', file.originalname);
+    console.log('  - Mimetype:', file.mimetype);
+    console.log('  - Size:', file.size);
+    
     // Accepter seulement les images et vidéos
     const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/mpeg'];
     if (allowedMimes.includes(file.mimetype)) {
+      console.log('✅ Type accepté');
       cb(null, true);
     } else {
-      cb(new Error('Type de fichier non autorisé'));
+      console.log('❌ Type rejeté:', file.mimetype);
+      cb(new Error('Type de fichier non autorisé: ' + file.mimetype));
     }
   }
 });
