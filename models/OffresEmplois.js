@@ -17,7 +17,8 @@ class OffresEmplois {
     try {
       const [rows] = await pool.execute(
         `SELECT * FROM offres_emplois 
-         WHERE date_limite >= CURDATE()
+         WHERE CURDATE() >= date_publication 
+         AND CURDATE() <= date_limite
          ORDER BY date_limite ASC`
       )
       return rows
@@ -42,13 +43,13 @@ class OffresEmplois {
 
   static async create(offresData) {
     try {
-      const { poste, contact_entreprise, img_affiche, lien, description, date_limite } = offresData
+      const { poste, contact_entreprise, img_affiche, lien, description, date_limite, date_publication } = offresData
       
       const [result] = await pool.execute(
         `INSERT INTO offres_emplois 
-         (poste, contact_entreprise, img_affiche, lien, description, date_limite) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [poste, contact_entreprise, img_affiche || null, lien || null, description || null, date_limite]
+         (poste, contact_entreprise, img_affiche, lien, description, date_limite, date_publication) 
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [poste, contact_entreprise, img_affiche || null, lien || null, description || null, date_limite, date_publication || null]
       )
       
       return {
@@ -63,13 +64,13 @@ class OffresEmplois {
 
   static async update(id, offresData) {
     try {
-      const { poste, contact_entreprise, img_affiche, lien, description, date_limite } = offresData
+      const { poste, contact_entreprise, img_affiche, lien, description, date_limite, date_publication } = offresData
       
       const [result] = await pool.execute(
         `UPDATE offres_emplois 
-         SET poste = ?, contact_entreprise = ?, img_affiche = ?, lien = ?, description = ?, date_limite = ?
+         SET poste = ?, contact_entreprise = ?, img_affiche = ?, lien = ?, description = ?, date_limite = ?, date_publication = ?
          WHERE id = ?`,
-        [poste, contact_entreprise, img_affiche || null, lien || null, description || null, date_limite, id]
+        [poste, contact_entreprise, img_affiche || null, lien || null, description || null, date_limite, date_publication || null, id]
       )
       
       if (result.affectedRows === 0) {

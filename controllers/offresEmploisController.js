@@ -47,12 +47,12 @@ export const getOffreById = async (req, res) => {
 
 export const createOffre = async (req, res) => {
   try {
-    const { poste, contact_entreprise, lien, description, date_limite, img_affiche } = req.body
+    const { poste, contact_entreprise, lien, description, date_limite, date_publication, img_affiche } = req.body
     
     // Validation
-    if (!poste || !contact_entreprise || !date_limite) {
+    if (!poste || !contact_entreprise || !date_limite || !date_publication) {
       return res.status(400).json({ 
-        error: 'Les champs poste, contact_entreprise et date_limite sont obligatoires' 
+        error: 'Les champs poste, contact_entreprise, date_publication et date_limite sont obligatoires' 
       })
     }
     
@@ -80,12 +80,12 @@ export const createOffre = async (req, res) => {
 export const updateOffre = async (req, res) => {
   try {
     const { id } = req.params
-    const { poste, contact_entreprise, lien, description, date_limite, img_affiche } = req.body
+    const { poste, contact_entreprise, lien, description, date_limite, date_publication, img_affiche } = req.body
     
     // Validation
-    if (!poste || !contact_entreprise || !date_limite) {
+    if (!poste || !contact_entreprise || !date_limite || !date_publication) {
       return res.status(400).json({ 
-        error: 'Les champs poste, contact_entreprise et date_limite sont obligatoires' 
+        error: 'Les champs poste, contact_entreprise, date_publication et date_limite sont obligatoires' 
       })
     }
     
