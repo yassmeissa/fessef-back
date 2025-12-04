@@ -14,6 +14,9 @@ const addPresident = async (req, res) => {
   let imagePath = '';
   if (req.file) {
     imagePath = '/uploads/' + req.file.filename;
+  } else if (image && image.startsWith('data:image')) {
+    // Si l'image est en base64, la garder telle quelle
+    imagePath = image;
   } else if (image) {
     imagePath = image;
   }
@@ -27,12 +30,15 @@ const addPresident = async (req, res) => {
 };
 
 const updatePresident = async (req, res) => {
-  const { nom, dates_mandat } = req.body;
+  const { nom, dates_mandat, image } = req.body;
   let imagePath = '';
   if (req.file) {
     imagePath = '/uploads/' + req.file.filename;
-  } else if (req.body.image) {
-    imagePath = req.body.image;
+  } else if (image && image.startsWith('data:image')) {
+    // Si l'image est en base64, la garder telle quelle
+    imagePath = image;
+  } else if (image) {
+    imagePath = image;
   }
   try {
     await query('UPDATE anciens_presidents SET nom=?, dates_mandat=?, image=? WHERE id=?', [nom, dates_mandat, imagePath, req.params.id]);
