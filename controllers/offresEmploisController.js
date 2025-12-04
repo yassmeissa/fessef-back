@@ -47,6 +47,9 @@ export const getOffreById = async (req, res) => {
 
 export const createOffre = async (req, res) => {
   try {
+    console.log('📥 Création offre - Body:', req.body)
+    console.log('📥 Création offre - File:', req.file)
+    
     const { poste, contact_entreprise, lien, description, date_limite, date_publication, img_affiche } = req.body
     
     // Validation
@@ -60,6 +63,7 @@ export const createOffre = async (req, res) => {
     
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
+      console.log('✅ Fichier uploadé:', req.file.filename)
       offreData.img_affiche = `/uploads/${req.file.filename}`
     } else if (img_affiche && img_affiche.startsWith('data:image')) {
       // Si l'image est en base64, la garder telle quelle
@@ -79,6 +83,10 @@ export const createOffre = async (req, res) => {
 
 export const updateOffre = async (req, res) => {
   try {
+    console.log('📥 Mise à jour offre ID:', req.params.id)
+    console.log('📥 Mise à jour offre - Body:', req.body)
+    console.log('📥 Mise à jour offre - File:', req.file)
+    
     const { id } = req.params
     const { poste, contact_entreprise, lien, description, date_limite, date_publication, img_affiche } = req.body
     
@@ -93,6 +101,7 @@ export const updateOffre = async (req, res) => {
     
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
+      console.log('✅ Fichier uploadé:', req.file.filename)
       offreData.img_affiche = `/uploads/${req.file.filename}`
     } else if (img_affiche && img_affiche.startsWith('data:image')) {
       // Si l'image est en base64, la garder telle quelle
