@@ -78,6 +78,14 @@ export const createEvent = async (req, res) => {
   try {
     const eventData = req.body
     
+    // Gérer les dates nulles pour les événements "Bientôt"
+    if (eventData.date === 'null' || eventData.date === null || eventData.date === '') {
+      eventData.date = null
+    }
+    if (eventData.time === 'null' || eventData.time === null || eventData.time === '') {
+      eventData.time = null
+    }
+    
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
       eventData.image_url = `/uploads/${req.file.filename}`
@@ -108,6 +116,14 @@ export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params
     const eventData = req.body
+    
+    // Gérer les dates nulles pour les événements "Bientôt"
+    if (eventData.date === 'null' || eventData.date === null || eventData.date === '') {
+      eventData.date = null
+    }
+    if (eventData.time === 'null' || eventData.time === null || eventData.time === '') {
+      eventData.time = null
+    }
     
     // Si un fichier a été uploadé, ajouter son chemin aux données
     if (req.file) {
