@@ -76,7 +76,14 @@ export const getEventById = async (req, res) => {
 
 export const createEvent = async (req, res) => {
   try {
-    const eventData = req.body
+    let eventData = req.body
+    
+    // Remplacer undefined par null pour éviter les erreurs de binding
+    Object.keys(eventData).forEach(key => {
+      if (eventData[key] === undefined) {
+        eventData[key] = null
+      }
+    })
     
     // Gérer les dates nulles pour les événements "Bientôt"
     if (eventData.date === 'null' || eventData.date === null || eventData.date === '') {
@@ -115,7 +122,14 @@ export const createEvent = async (req, res) => {
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params
-    const eventData = req.body
+    let eventData = req.body
+    
+    // Remplacer undefined par null pour éviter les erreurs de binding
+    Object.keys(eventData).forEach(key => {
+      if (eventData[key] === undefined) {
+        eventData[key] = null
+      }
+    })
     
     // Gérer les dates nulles pour les événements "Bientôt"
     if (eventData.date === 'null' || eventData.date === null || eventData.date === '') {
