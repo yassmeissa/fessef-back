@@ -1,9 +1,29 @@
 import { query } from '../config/database.js';
 
+// Fonction helper pour construire les URLs complètes des images
+const buildImageUrl = (imagePath, req) => {
+  if (!imagePath) return '';
+  
+  // Si c'est déjà une URL complète ou du base64, retourner tel quel
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:image')) {
+    return imagePath;
+  }
+  
+  // Construire l'URL complète avec le protocole et l'host
+  const protocol = req.protocol || 'http';
+  const host = req.get('host') || 'localhost:3001';
+  return `${protocol}://${host}${imagePath}`;
+};
+
 const getAllPresidents = async (req, res) => {
   try {
     const rows = await query('SELECT * FROM anciens_presidents');
-    res.json(rows);
+    // Transformer les images pour inclure les URLs complètes
+    const rowsWithUrls = rows.map(row => ({
+      ...row,
+      image: buildImageUrl(row.image, req)
+    }));
+    res.json(rowsWithUrls);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -55,8 +75,13 @@ const addPresident = async (req, res) => {
     console.log('✅ Insertion réussie');
     
     const rows = await query('SELECT * FROM anciens_presidents ORDER BY id DESC LIMIT 1');
-    console.log('🎉 Président créé:', rows[0]);
-    res.json(rows[0]);
+    const presidentData = rows[0];
+    
+    // Construire l'URL complète pour l'image
+    presidentData.image = buildImageUrl(presidentData.image, req);
+    
+    console.log('🎉 Président créé:', presidentData);
+    res.json(presidentData);
   } catch (err) {
     console.error('❌ ERREUR dans addPresident:');
     console.error('  Message:', err.message);
@@ -112,8 +137,9 @@ const updatePresident = async (req, res) => {
     await query('UPDATE anciens_presidents SET nom=?, dates_mandat=?, image=? WHERE id=?', [nom, dates_mandat, imagePath, req.params.id]);
     console.log('✅ Mise à jour réussie');
     
+    const fullImageUrl = buildImageUrl(imagePath, req);
     console.log('🎉 Président modifié');
-    res.json({ id: req.params.id, nom, dates_mandat, image: imagePath });
+    res.json({ id: req.params.id, nom, dates_mandat, image: fullImageUrl });
   } catch (err) {
     console.error('❌ ERREUR dans updatePresident:');
     console.error('  Message:', err.message);
