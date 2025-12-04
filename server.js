@@ -54,7 +54,7 @@ const corsOptions = {
   optionsSuccessStatus: 200
 }
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '200mb' }));
+app.use(express.json({ limit: '50mb' }));
 
 // Servir les fichiers statiques (images)
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
