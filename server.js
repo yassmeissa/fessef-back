@@ -73,8 +73,8 @@ app.use((req, res, next) => {
 });
 
 // Servir les fichiers statiques (images)
-app.use('/images', express.static(path.join(__dirname, '../public/images')));
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Routes API
 app.use('/api', bureauMemberRoutes);
